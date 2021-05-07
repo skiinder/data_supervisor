@@ -7,6 +7,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
 import datetime
+import urllib
+import urllib2
 
 
 def get_yesterday():
@@ -16,23 +18,53 @@ def get_yesterday():
     return yesterday
 
 
-def mail_alert(message):
+def one_alert(line):
     """
 
-    :type message: list
+    :type line: dict
+    """
+
+    one_alert_key = "c2030c9a-7896-426f-bd64-59a8889ac8e3"
+    one_alert_host = "http://api.aiops.com/alert/api/event"
+    data = {
+        "app": one_alert_key,
+        "eventType": "trigger",
+        "eventId": "12345",
+        "alarmName": "".join(["表格", str(line["tbl"]), "数据异常."]),
+        "alarmContent": "".join(["指标", str(line["norm"]), "值为", str(line["value"]),
+                                 ", 应为", str(line["value_min"]), "-", str(line["value_max"]),
+                                 ", 参考信息：" + str(line["col"]) if line.get("col") else ""]),
+        "priority": line["notification_level"] + 1
+    }
+
+    body = urllib.urlencode(data)
+    request = urllib2.Request(one_alert_host, body)
+    urlopen = urllib2.urlopen(request).read().decode('utf-8')
+    print urlopen
+
+
+def mail_alert(line):
+    """
+
+    :type line: dict
     """
 
     mail_host = "smtp.126.com"
     mail_user = "skiinder@126.com"
     mail_pass = "KADEMQZWCPFWZETF"
 
+    message = ["".join(["表格", str(line["tbl"]), "数据异常."]),
+               "".join(["指标", str(line["norm"]), "值为", str(line["value"]),
+                        ", 应为", str(line["value_min"]), "-", str(line["value_max"]),
+                        ", 参考信息：" + str(line["col"]) if line.get("col") else ""])]
+
     sender = mail_user
     receivers = [mail_user]
 
-    mail_content = MIMEText(''.join(['<html>', '<br>'.join(message), '</html>']), 'html', 'utf-8')
-    mail_content['from'] = sender
-    mail_content['to'] = receivers[0]
-    mail_content['Subject'] = Header('数据监控错误', 'utf-8')
+    mail_content = MIMEText("".join(["<html>", "<br>".join(message), "</html>"]), "html", "utf-8")
+    mail_content["from"] = sender
+    mail_content["to"] = receivers[0]
+    mail_content["Subject"] = Header(message[0], "utf-8")
 
     try:
         smtp = smtplib.SMTP_SSL()
@@ -55,11 +87,11 @@ def read_table(table, dt):
     cursor = connect.cursor()
     query = "desc " + table
     cursor.execute(query)
-    head = map(lambda x: x[0], cursor.fetchall())
+    head = map(lambda x: str(x[0]), cursor.fetchall())
     query = ("select * from " + table + " where dt='" + dt + "' and `value` not between value_min and value_max")
     cursor.execute(query)
-    fetchall = map(lambda x: dict(x), map(lambda x: zip(head, x), cursor.fetchall()))
-    print type(fetchall[0])
+    cursor_fetchall = cursor.fetchall()
+    fetchall = map(lambda x: dict(x), map(lambda x: zip(head, x), cursor_fetchall))
     return fetchall
 
 
@@ -70,14 +102,18 @@ def main(argv):
     else:
         dt = str(get_yesterday())
 
-    # 初始化警告正文
-    alert_string = []
+    notification_level = 0
 
-    # 如果警告数量大于0，发送警告
-    if len(alert_string) > 0:
-        mail_alert(alert_string)
+    # alert = mail_alert
+    alert = one_alert
+
+    # 查询所有错误内容，如果大于设定警告等级，就发送警告
+    for table in ["day_on_day", "duplicate", "null_id", "rng", "std_dev", "week_on_week"]:
+        for line in read_table(table, dt):
+            if line["notification_level"] >= notification_level:
+                line["norm"] = table
+                alert(line)
 
 
 if __name__ == "__main__":
-    read_table("null_id", "2021-04-29")
-    # main(sys.argv)
+    main(sys.argv)

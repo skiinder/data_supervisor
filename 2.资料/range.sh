@@ -49,7 +49,7 @@ mysql_user="root"
 mysql_passwd="000000"
 mysql_host="hadoop102"
 mysql_DB="test"
-mysql_tbl="range"
+mysql_tbl="rng"
 
 RESULT=$($HIVE_ENGINE -e "select count(1) from $HIVE_DB.$TABLE where dt='$DT' and $COL not between $RANGE_MIN and $RANGE_MAX;")
 mysql -h"$mysql_host" -u"$mysql_user" -p"$mysql_passwd" \

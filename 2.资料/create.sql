@@ -28,7 +28,7 @@ CREATE TABLE test.`duplicate`
   DEFAULT CHARSET = utf8
     comment '重复值指标表';
 
-CREATE TABLE test.`range`
+CREATE TABLE test.`rng`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
