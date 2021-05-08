@@ -43,6 +43,9 @@ while getopts "t:d:l:c:s:x:a:b:" arg; do
   esac
 done
 
+[ $DT ] || DT=$(date -d '-1 day' +%F)
+[ $LEVEL ] || LEVEL=0
+
 HIVE_DB=gmall
 HIVE_ENGINE=hive
 mysql_user="root"

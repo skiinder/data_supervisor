@@ -9,6 +9,7 @@ from email.header import Header
 import datetime
 import urllib
 import urllib2
+import random
 
 
 def get_yesterday():
@@ -24,12 +25,14 @@ def one_alert(line):
     :type line: dict
     """
 
+    # 睿象云的rest api key
     one_alert_key = "c2030c9a-7896-426f-bd64-59a8889ac8e3"
     one_alert_host = "http://api.aiops.com/alert/api/event"
+
     data = {
         "app": one_alert_key,
         "eventType": "trigger",
-        "eventId": "12345",
+        "eventId": str(random.randint(10000, 99999)),
         "alarmName": "".join(["表格", str(line["tbl"]), "数据异常."]),
         "alarmContent": "".join(["指标", str(line["norm"]), "值为", str(line["value"]),
                                  ", 应为", str(line["value_min"]), "-", str(line["value_max"]),
@@ -49,6 +52,7 @@ def mail_alert(line):
     :type line: dict
     """
 
+    # smtp协议发送邮件的必要设置
     mail_host = "smtp.126.com"
     mail_user = "skiinder@126.com"
     mail_pass = "KADEMQZWCPFWZETF"
@@ -77,6 +81,8 @@ def mail_alert(line):
 
 
 def read_table(table, dt):
+
+    # mysql必要参数设置
     mysql_user = "root"
     mysql_password = "000000"
     mysql_host = "hadoop102"

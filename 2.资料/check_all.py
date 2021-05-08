@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import os
-import thread
 import time
 import urllib
 import urllib2
@@ -134,12 +133,7 @@ def check_ods(dt, session_id, exec_id):
     :return: None
     """
     if wait_node(session_id, exec_id, "hdfs_to_ods_db") and wait_node(session_id, exec_id, "hdfs_to_ods_log"):
-        os.system("bash ods_order_info.sh " + dt)
-        os.system("bash check_ods_order_detail.sh " + dt)
-        os.system("bash check_ods_order_refund_info.sh " + dt)
-        os.system("bash check_ods_payment_info.sh " + dt)
-        os.system("bash check_ods_refund_payment.sh " + dt)
-        os.system("bash check_ods_user_info.sh " + dt)
+        os.system("bash check_ods.sh " + dt)
 
 
 def check_dim(dt, session_id, exec_id):
@@ -152,10 +146,7 @@ def check_dim(dt, session_id, exec_id):
     :return: None
     """
     if wait_node(session_id, exec_id, "ods_to_dim_db"):
-        os.system("bash check_dim_activity_rule_info.sh " + dt)
-        os.system("bash check_dim_sku_info.sh " + dt)
-        os.system("bash check_dim_coupon_info.sh " + dt)
-        os.system("bash check_dim_user_info.sh " + dt)
+        os.system("bash check_dim.sh " + dt)
 
 
 def check_dwd(dt, session_id, exec_id):
@@ -168,11 +159,7 @@ def check_dwd(dt, session_id, exec_id):
     :return: None
     """
     if wait_node(session_id, exec_id, "ods_to_dwd_db") and wait_node(session_id, exec_id, "ods_to_dwd_log"):
-        os.system("bash check_dwd_order_info.sh " + dt)
-        os.system("bash check_dwd_order_detail.sh " + dt)
-        os.system("bash check_dwd_payment_info.sh " + dt)
-        os.system("bash check_dwd_refund_payment.sh " + dt)
-        os.system("bash check_dwd_order_refund_info.sh " + dt)
+        os.system("bash check_dwd.sh " + dt)
 
 
 if __name__ == '__main__':
