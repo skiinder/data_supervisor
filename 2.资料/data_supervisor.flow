@@ -1,0 +1,12 @@
+nodes:
+  - name: check_all
+    type: command
+    config:
+     command: python check_all.py ${dt}
+    
+  - name: check_notification
+    type: command
+    dependsOn:
+         - check_all
+    config:
+     command: python check_notification.py ${alert} ${dt}

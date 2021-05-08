@@ -6,6 +6,8 @@ import time
 import urllib
 import urllib2
 import json
+import sys
+from check_notification import get_yesterday
 
 az_url = "http://hadoop102:8081/"
 az_username = "atguigu"
@@ -98,6 +100,7 @@ def wait_node(session_id, exec_id, node_id):
         for node in flow_exec.get(u"nodes"):
             if unicode(node_id) == node.get(u"id"):
                 status = str(node.get(u"status"))
+        print " ".join([node_id, status])
         time.sleep(1)
     return status == "SUCCEEDED"
 
@@ -121,63 +124,73 @@ def exec_flow(session_id, project_id, flow_id):
     return str(execs.get(u"execid"))
 
 
-def check_ods(session_id, exec_id):
+def check_ods(dt, session_id, exec_id):
     """
     检查ODS层数据质量
 
+    :param dt: 日期
     :param session_id: 和azkaban通讯的session_id
     :param exec_id: 指定的执行ID
     :return: None
     """
     if wait_node(session_id, exec_id, "hdfs_to_ods_db") and wait_node(session_id, exec_id, "hdfs_to_ods_log"):
-        os.system("check_ods_order_info.sh")
-        os.system("check_ods_order_detail.sh")
-        os.system("check_ods_order_refund_info.sh")
-        os.system("check_ods_payment_info.sh")
-        os.system("check_ods_refund_payment.sh")
-        os.system("check_ods_user_info.sh")
+        os.system("bash ods_order_info.sh " + dt)
+        os.system("bash check_ods_order_detail.sh " + dt)
+        os.system("bash check_ods_order_refund_info.sh " + dt)
+        os.system("bash check_ods_payment_info.sh " + dt)
+        os.system("bash check_ods_refund_payment.sh " + dt)
+        os.system("bash check_ods_user_info.sh " + dt)
 
 
-def check_dim(session_id, exec_id):
+def check_dim(dt, session_id, exec_id):
     """
     检查DIM层数据质量
 
+    :param dt: 日期
     :param session_id: 和azkaban通讯的session_id
     :param exec_id: 指定的执行ID
     :return: None
     """
     if wait_node(session_id, exec_id, "ods_to_dim_db"):
-        os.system("check_dim_activity_rule_info.sh")
-        os.system("check_dim_sku_info.sh")
-        os.system("check_dim_coupon_info.sh")
-        os.system("check_dim_user_info.sh")
+        os.system("bash check_dim_activity_rule_info.sh " + dt)
+        os.system("bash check_dim_sku_info.sh " + dt)
+        os.system("bash check_dim_coupon_info.sh " + dt)
+        os.system("bash check_dim_user_info.sh " + dt)
 
 
-def check_dwd(session_id, exec_id):
+def check_dwd(dt, session_id, exec_id):
     """
     检查DWD层数据质量
 
+    :param dt: 日期
     :param session_id: 和azkaban通讯的session_id
     :param exec_id: 指定的执行ID
     :return: None
     """
     if wait_node(session_id, exec_id, "ods_to_dwd_db") and wait_node(session_id, exec_id, "ods_to_dwd_log"):
-        os.system("check_dwd_order_info.sh")
-        os.system("check_dwd_order_detail.sh")
-        os.system("check_dwd_payment_info.sh")
-        os.system("check_dwd_refund_payment.sh")
-        os.system("check_dwd_order_refund_info.sh")
+        os.system("bash check_dwd_order_info.sh " + dt)
+        os.system("bash check_dwd_order_detail.sh " + dt)
+        os.system("bash check_dwd_payment_info.sh " + dt)
+        os.system("bash check_dwd_refund_payment.sh " + dt)
+        os.system("bash check_dwd_order_refund_info.sh " + dt)
 
 
 if __name__ == '__main__':
+    argv = sys.argv
     # 获取session_id
     session_id = login()
 
     # 获取执行ID。只有在原Flow正在执行时才能获取
     exec_id = get_exec_id(session_id, project, flow)
 
+    # 获取日期，如果不存在取昨天
+    if len(argv) >= 2:
+        dt = argv[1]
+    else:
+        dt = get_yesterday()
+
     # 检查各层数据质量
     if exec_id:
-        thread.start_new_thread(check_ods, (session_id, exec_id,))
-        thread.start_new_thread(check_dim, (session_id, exec_id,))
-        thread.start_new_thread(check_dwd, (session_id, exec_id,))
+        check_ods(dt, session_id, exec_id)
+        check_dim(dt, session_id, exec_id)
+        check_dwd(dt, session_id, exec_id)

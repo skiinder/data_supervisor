@@ -15,7 +15,7 @@ def get_yesterday():
     today = datetime.date.today()
     one_day = datetime.timedelta(days=1)
     yesterday = today - one_day
-    return yesterday
+    return str(yesterday)
 
 
 def one_alert(line):
@@ -97,15 +97,21 @@ def read_table(table, dt):
 
 def main(argv):
     # 如果没有传入日期参数，将日期定为昨天
-    if len(argv) >= 2:
-        dt = argv[1]
+    if len(argv) >= 3:
+        dt = argv[2]
     else:
-        dt = str(get_yesterday())
+        dt = get_yesterday()
 
     notification_level = 0
 
-    # alert = mail_alert
-    alert = one_alert
+    alert = None
+    if len(argv) >= 2:
+        alert = {
+            "mail": mail_alert,
+            "one": one_alert
+        }[argv[1]]
+    if not alert:
+        alert = one_alert
 
     # 查询所有错误内容，如果大于设定警告等级，就发送警告
     for table in ["day_on_day", "duplicate", "null_id", "rng", "std_dev", "week_on_week"]:
@@ -116,4 +122,7 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    # 两个命令行参数
+    # 第一个为警告类型：one或者mail
+    # 第二个为日期，留空取昨天
     main(sys.argv)

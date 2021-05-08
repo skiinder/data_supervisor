@@ -2,5 +2,5 @@
 DT=$1
 [ -z $DT ] || DT=$(date -d '-1 day' +%F)
 
-duplicate.sh -t dim_activity_rule_info -d "$DT" -c id -s 0 -x 5
-null_id.sh -t dim_activity_rule_info -d "$DT" -c id -s 0 -x 10
+bash duplicate.sh -t dim_activity_rule_info -d "$DT" -c id -s 0 -x 5
+bash null_id.sh -t dim_activity_rule_info -d "$DT" -c id -s 0 -x 10
