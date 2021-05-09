@@ -86,17 +86,23 @@ def read_table(table, dt):
     mysql_user = "root"
     mysql_password = "000000"
     mysql_host = "hadoop102"
-    mysql_schema = "test"
+    mysql_schema = "data_supervisor"
 
     # 从mysql中取数据并转化为字典
     connect = mysql.connector.connect(user=mysql_user, password=mysql_password, host=mysql_host, database=mysql_schema)
     cursor = connect.cursor()
+
+    # 查询表头
     query = "desc " + table
     cursor.execute(query)
     head = map(lambda x: str(x[0]), cursor.fetchall())
+
+    # 查询所有指标值不在规定范围的条目
     query = ("select * from " + table + " where dt='" + dt + "' and `value` not between value_min and value_max")
     cursor.execute(query)
     cursor_fetchall = cursor.fetchall()
+
+    # 将指标和表头映射成为dict数组
     fetchall = map(lambda x: dict(x), map(lambda x: zip(head, x), cursor_fetchall))
     return fetchall
 
@@ -110,6 +116,7 @@ def main(argv):
 
     notification_level = 0
 
+    # 通过参数设置告警方式，默认是睿象云
     alert = None
     if len(argv) >= 2:
         alert = {

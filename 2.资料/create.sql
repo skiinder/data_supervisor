@@ -1,6 +1,6 @@
-drop database if exists test;
-create database test;
-CREATE TABLE test.`null_id`
+drop database if exists data_supervisor;
+create database data_supervisor;
+CREATE TABLE data_supervisor.`null_id`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
@@ -14,7 +14,7 @@ CREATE TABLE test.`null_id`
   DEFAULT CHARSET = utf8
     comment '空值指标表';
 
-CREATE TABLE test.`duplicate`
+CREATE TABLE data_supervisor.`duplicate`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
@@ -28,7 +28,7 @@ CREATE TABLE test.`duplicate`
   DEFAULT CHARSET = utf8
     comment '重复值指标表';
 
-CREATE TABLE test.`rng`
+CREATE TABLE data_supervisor.`rng`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
@@ -44,7 +44,7 @@ CREATE TABLE test.`rng`
   DEFAULT CHARSET = utf8
     comment '值域指标表';
 
-CREATE TABLE test.`day_on_day`
+CREATE TABLE data_supervisor.`day_on_day`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
@@ -57,7 +57,7 @@ CREATE TABLE test.`day_on_day`
   DEFAULT CHARSET = utf8
     comment '环比增长指标表';
 
-CREATE TABLE test.`week_on_week`
+CREATE TABLE data_supervisor.`week_on_week`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
@@ -70,7 +70,7 @@ CREATE TABLE test.`week_on_week`
   DEFAULT CHARSET = utf8
     comment '同比增长指标表';
 
-CREATE TABLE test.`std_dev`
+CREATE TABLE data_supervisor.`std_dev`
 (
     `dt`                 date        NOT NULL COMMENT '日期',
     `tbl`                varchar(50) NOT NULL COMMENT '表名',
